@@ -1,4 +1,5 @@
 # Cosu
+<<<<<<< HEAD
 Cosu is a C wrapper for the osu!api v2. It is a single header library, just copy paste the cosu.h file in your directory and define its implementation:
 ```C
 #define COSU_IMPLEMENTATION
@@ -72,4 +73,7 @@ int main(void)
 }
 ```
 
+=======
+osu v2 api wrapper in C
+>>>>>>> 82fc4ec (gitignore and example.c)
 
