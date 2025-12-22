@@ -92,6 +92,7 @@ Example on how to use it in your source file:
 #include "cosu.h"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 int main(void)
 {
 		CURL *curl = init_curl(); // function to get the "curl" ready for get/post requests.
@@ -125,6 +126,8 @@ osu v2 api wrapper in C
 #include <curl/curl.h> // Necessary lib
 
 
+=======
+>>>>>>> aecf4f8 (modified example.c and readme)
 int main(void)
 {
 		CURL *curl = init_curl(); // function to get the "curl" ready for get/post requests.
