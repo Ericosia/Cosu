@@ -4,7 +4,6 @@
 #define COSU_IMPLEMENTATION
 #include "cosu.h"
 #include <stdio.h>
-#include <curl/curl.h> // Must be included 
 
 #define CLIENT_ID 			"123456"
 #define CLIENT_SECRET 	"osu OAUTH client secret"

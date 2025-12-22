@@ -45,9 +45,6 @@ Example on how to use it in your source file:
 #define COSU_IMPLEMENTATION
 #include "cosu.h"
 
-#include <curl/curl.h> // Necessary lib
-
-
 int main(void)
 {
 		CURL *curl = init_curl(); // function to get the "curl" ready for get/post requests.
