@@ -5,6 +5,11 @@ Cosu is a C wrapper for the osu!api v2. It is a single header library, just copy
 #include "cosu.h"
 ```
 
+To compile the code, make sure you link with libcurl:
+```bash
+gcc -o example example.c -lcurl
+```
+
 ## API
 Currently Cosu only has the "user scores" endpoint, more will be added in the future.
 
