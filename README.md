@@ -10,6 +10,9 @@ Cosu is a C wrapper for the osu!api v2. It is a single header library, just copy
 ```
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 3ae3a6d (added compilation to readme)
 To compile the code, make sure you link with libcurl:
 ```bash
 gcc -o example example.c -lcurl
