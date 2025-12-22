@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-#define CLIENT_ID 			"44659"
-#define CLIENT_SECRET 	"qNuab3Pn4qrmJnxpZTkJgnM9B7tktgZ3v8lxEOsC"
+#define CLIENT_ID 			"123456"
+#define CLIENT_SECRET 	"osu OAUTH client secret"
 
 char *get_token(char *res)
 {
@@ -21,7 +21,7 @@ char *get_token(char *res)
 int main(void)
 {
 		CURL *curl = init_curl();
-		char *res_token = get_access_token(curl, );
+		char *res_token = get_access_token(curl, CLIENT_ID, CLIENT_SECRET);
 		char *token = get_token(res_token);
 		char *user_best_scores = get_user_score(curl, token, "14586541", "best", 1, 0);
 
