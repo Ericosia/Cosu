@@ -10,7 +10,7 @@ char *get_user_score(CURL *curl, const char *access_token, const char *user_id, 
 
 #endif // COSU_H
 
-#ifdef COSU_IMPLEMENTATION
+#ifndef COSU_IMPLEMENTATION
 
 #include <stdio.h>
 #include <stdlib.h>
