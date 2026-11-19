@@ -1,7 +1,11 @@
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <curl/curl.h>
+
+#include "env.h"
 
 #define ERROR_FMT "--[ERROR]: %s:%s.%d: "
 #define LOG_ERROR(err_msg, ...) fprintf(stderr, ERROR_FMT err_msg "\n", \
@@ -9,69 +13,94 @@
 
 #define defer(_value) do { result = (_value); goto _defer; } while(0)
 
-#define OSU_WEB_URL "https://osu.ppy.sh"
 
 typedef struct {
-    char *data;
-    size_t length;
-} String_View, SV;
-
-typedef struct {
-    String_View key;
-    String_View value;
-} Key_Value, KV;
-
-typedef struct {
-    size_t client_id;
-    String_View client_secret;
+    String_View *client_id;
+    String_View *client_secret;
 } Credentials, Creds;
+
+
+typedef enum: uint8_t {
+    BEARER = 0,
+    ERROR
+} TOKEN_TYPE;
+
+typedef struct {
+    TOKEN_TYPE type;
+    size_t expires_in;
+    String_View access_token;
+    String_View refersh_token;
+} Oauth_Res;
 
 typedef struct {
     Credentials creds;
-    char *token;
+    Oauth_Res res;
     char **scores;
 } Osu;
 
 
-
-// return file contents
-char* read_file(const char *file)
+Credentials get_client_creds(char *file)
 {
-    char *result;
-    FILE *fptr = fopen(file, "r");
-    if (!fptr) {
-	LOG_ERROR("Failed to open %s!", file);
-	defer(NULL);
-    }
- 
-    fseek(fptr, 0, SEEK_END);
-    size_t buf_size = ftell(fptr);
-    rewind(fptr);
+    
+    Envs envs = { 0 };
+    load_envs(&envs, file);
 
-    char *buf = calloc(buf_size, sizeof(*buf));
-    assert(buf && "Failed to allocate buffer for file's content");
-
-    size_t bytes_read = fread(buf, sizeof(*buf), buf_size, fptr);
-    if (bytes_read != buf_size) {
-	LOG_ERROR("Partial read of the file's content!");
-	defer(buf);
-    }
-
-    defer(buf);
-
-_defer:
-    if (fptr)
-	fclose(fptr);
-
-    return result;
+    return (Credentials) {
+	get_value(&envs, "OSU_CLIENT_ID"),
+	get_value(&envs, "OSU_CLIENT_SECRET"),
+    };
 }
 
 
-int env_read_u64(char *content, size_t *userp)
+size_t cb(char *buffer, size_t size, size_t nmemb, void *userp)
 {
+    size_t total_size = size * nmemb;
+    Oauth_Res *res = (Oauth_Res *)userp;
 
+    res->type = ERROR;
+
+    printf("%s\n", buffer);
+    return total_size;
 }
 
+CURL *init_curl(void)
+{
+    curl_global_init(CURL_GLOBAL_SSL);
+    CURL *handle = curl_easy_init();
+    if (!handle) {
+	LOG_ERROR("Failed to initialize the curl handle!");
+	return NULL;
+    }
+    return handle;
+}
+
+#define OSU_WEB_URL "https://osu.ppy.sh"
+#define OSU_AUTH_ENDPOINT OSU_WEB_URL"/oauth/token"
+#define OSU_AUTH_PARAMS_LENGTH(creds) sizeof("client_id=") + sizeof("&client_secret") + \
+    sizeof("&grant_type=client_credentials&scope=public") + (creds).client_secret->count \
+    + (creds).client_id->count
+
+unsigned int get_access_token(CURL *handle, Credentials creds, Oauth_Res *res)
+{
+    char endpoint[OSU_AUTH_PARAMS_LENGTH(creds) + 1];
+    snprintf(endpoint, OSU_AUTH_PARAMS_LENGTH(creds), "client_id="SV_FMT"&client_secret="SV_FMT"&grant_type=client_credentials&scope=public", SV_ARGS(*creds.client_id), SV_ARGS(*creds.client_secret));
+    endpoint[OSU_AUTH_PARAMS_LENGTH(creds)] = '\0';
+
+    curl_easy_setopt(handle, CURLOPT_URL, OSU_AUTH_ENDPOINT);
+    curl_easy_setopt(handle, CURLOPT_POSTFIELDS, endpoint);
+
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, cb);
+    curl_easy_setopt(handle, CURLOPT_WRITEDATA, res);
+
+    CURLcode ret = curl_easy_perform(handle);
+
+    if (ret != CURLE_OK) {
+	LOG_ERROR("Failed to send a post request to "OSU_AUTH_ENDPOINT);
+	return 1;
+    }
+
+    return 0;
+}
 
 #define SHIFT_ARGS(arr, count) (assert((count) > 0), (count)--, *(arr)++)
 int main(int argc, char *argv[])
@@ -82,45 +111,21 @@ int main(int argc, char *argv[])
 	return 1;
     }
 
-    char *file_content = read_file(argv[0]);
-    printf("File content:\n%s", file_content ? file_content : "NULL");
-
+    
     Osu osu = { 0 };
-    env_read_u64(file_content, &osu.creds.client_id);
+    osu.creds = get_client_creds(argv[0]);
+    printf("ID: "SV_FMT"\nSecret: "SV_FMT"\n", SV_ARGS(*osu.creds.client_id),
+	    SV_ARGS(*osu.creds.client_secret));
 
-    return 0;
-}
+    CURL *handle = init_curl();
 
-
-#if 0
-
-size_t cb(char *buffer, size_t size, size_t nmemb, void *userp)
-{
-    size_t total_size = size * nmemb;
-    Osu *osu = (Osu *)userp;
-
-    return total_size;
-}
-
-int init_curl(void)
-{
-    curl_global_init(CURL_GLOBAL_SSL);
-    CURL *handle = curl_easy_init();
-    if (!handle) {
-	LOG_ERROR("Failed to initialize the curl handle!");
+    printf(OSU_AUTH_ENDPOINT"\n");
+    if (get_access_token(handle, osu.creds, &osu.res) != 0) {
+	LOG_ERROR("Failed to get access token");
 	return 1;
     }
 
-    Osu osu = { "Hello, from cb", NULL };
-
-    curl_easy_setopt(handle, CURLOPT_URL, OSU_WEB_URL);
-    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, cb);
-    curl_easy_setopt(handle, CURLOPT_WRITEDATA, &osu);
-
-    // CURLcode ret = curl_easy_perform(handle);
-    // printf("ret: %d\n", ret);
-
+    printf("Token kind: %u\n", osu.res.type);
     return 0;
 }
 
-#endif
