@@ -6,6 +6,7 @@
 #include <curl/curl.h>
 
 #include "env.h"
+#include "jsmn.h"
 
 #define ERROR_FMT "--[ERROR]: %s:%s.%d: "
 #define LOG_ERROR(err_msg, ...) fprintf(stderr, ERROR_FMT err_msg "\n", \
