@@ -1,3 +1,17 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
 test
 .env
 tmp
+=======
+main
+<<<<<<< HEAD
+>>>>>>> 82fc4ec (gitignore and example.c)
+=======
+.env
+>>>>>>> a692661 (Added env file)
+=======
+test
+.env
+tmp
+>>>>>>> b183980 (Updated .gitignore)
