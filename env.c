@@ -142,7 +142,7 @@ String_View *get_value(Envs *envs, const char *key)
 {
     for (size_t i = 0; i < envs->count; i++) {
 	KV *pair = &envs->data[i];
-	if (!strncmp(key, pair->key.data, pair->key.count)) {
+	if (strlen(key) == pair->key.count && !strncmp(key, pair->key.data, pair->key.count)) {
 	    return &pair->value;
 	}
     }
