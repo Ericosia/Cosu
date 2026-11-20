@@ -93,14 +93,6 @@ String_View sv_from_parts(char *data, size_t count)
     };
 }
 
-String_View sv_from_cstr(char *data)
-{
-    return (SV) {
-	.data = data,
-	.count = strlen(data)
-    };
-}
-
 String_View sv_trim_left(String_View sv)
 {
     size_t i = 0;
