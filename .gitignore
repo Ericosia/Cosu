@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 test
 .env
 tmp
@@ -9,3 +10,8 @@ main
 =======
 .env
 >>>>>>> a692661 (Added env file)
+=======
+test
+.env
+tmp
+>>>>>>> b183980 (Updated .gitignore)
