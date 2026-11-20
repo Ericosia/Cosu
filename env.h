@@ -25,12 +25,6 @@
 	(da)->data[(da)->count++] = (item);\
     } while (0)
 
-#define da_append_many(da, new_items, new_items_count)                                      \
-    do {                                                                                        \
-        da_reserve((da), (da)->count + (new_items_count));                                  \
-        memcpy((da)->data + (da)->count, (new_items), (new_items_count)*sizeof(*(da)->data)); \
-        (da)->count += (new_items_count);                                                       \
-    } while (0)
 
 #define DEFAULT_SB_CAP 8
 #define DEFAULT_STR_CAP 1024
