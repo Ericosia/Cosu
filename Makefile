@@ -2,5 +2,5 @@ CC=gcc
 CFLAGS=-Wall -Wextra -ggdb
 
 
-main: main.c
-	$(CC) $(CFLAGS) -o main env.c main.c -lcurl
+test: test.c
+	$(CC) $(CFLAGS) -o test env.c test.c cosu.c -lcurl
