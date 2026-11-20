@@ -2,7 +2,7 @@
 #define ENV_H_
 
 
-#define DEFAULT_DA_CAP 5
+#define DEFAULT_DA_CAP 256
 // TODO: turn * to << op.
 #define da_resize(da, total_size)\
     do {\
@@ -27,8 +27,8 @@
 
 #define da_append_many(da, new_items, new_items_count)                                      \
     do {                                                                                        \
-        da_reserve((da), (da)->count + (new_items_count));                                  \
-        memcpy((da)->data + (da)->count, (new_items), (new_items_count)*sizeof(*(da)->data)); \
+        da_resize((da), (da)->count + (new_items_count));                                  \
+        memcpy((da)->data + (da)->count, (new_items), (new_items_count) * sizeof(*(da)->data)); \
         (da)->count += (new_items_count);                                                       \
     } while (0)
 
@@ -72,5 +72,7 @@ unsigned long get_value_as_u64(Envs *envs, const char *key);
 
 // Auxilary funcs
 bool read_entire_file(const char *file, String_Builder *sb);
+String_View sv_from_parts(char *data, unsigned long count);
+String_View sv_from_cstr(char *data);
 #endif // ENV_H_
 
